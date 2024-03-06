@@ -26,7 +26,7 @@ exports.getAllTours = async (req, res) => {
 exports.getTour = async (req, res) => {
 
     try {
-        const tour = await Tour.findById(req.params.id)
+        const tour = await Tour.findById(req.params.id) // by default it checks the _id field only
         // equivalent to this Tour.findOne({_id:req.params.id})
         res.status(200).json({
             status: "sucess",
@@ -45,9 +45,10 @@ exports.getTour = async (req, res) => {
 exports.createTour = async (req, res) => {
 
     try {
-        const newTour = await Tour.create(req.body)
 
-        res.status(201).json({
+        await Tour.create(req.body)
+
+        res.status(204).json({
             status: "sucess",
             data: {
                 tour: newTour
@@ -64,21 +65,45 @@ exports.createTour = async (req, res) => {
 
 }
 
-exports.updateTour = (req, res) => {
+exports.updateTour = async (req, res) => {
 
-    res.status(200).json({
-        status: "sucess",
-        data: {
-            tour: '<Updated Tour here...'
-        }
-    })
+    try {
+
+        const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true
+        })
+
+        res.status(200).json({
+            status: "sucess",
+            data: {
+                tour
+            }
+        })
+    }
+    catch (err) {
+        res.status(400).json({
+            status: 'fail',
+            message: err
+        })
+    }
 }
 
-exports.deleteTour = (req, res) => {
+exports.deleteTour = async (req, res) => {
 
-    res.status(204).json({
-        status: "sucess",
-        data: null
-    })
+    try {
+
+        const tour = await Tour.findByIdAndDelete(req.params.id)
+        res.status(204).json({
+            status: "sucess",
+            data: null
+        })
+
+    } catch (err) {
+        res.status(400).json({
+            status: 'fail',
+            message: err
+        })
+    }
 }
 
