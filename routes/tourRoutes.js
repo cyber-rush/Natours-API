@@ -1,12 +1,12 @@
 const express = require('express')
 const router = express.Router()
-const { getAllTours, createTour, getTour, updateTour, deleteTour, checkID, checkBody } = require('./../controllers/tourController')
+const { getAllTours, createTour, getTour, updateTour, deleteTour } = require('./../controllers/tourController')
 
-router.param('id', checkID) // midlleware that checks the invalid id's
+
 router
     .route('/')
     .get(getAllTours)
-    .post(checkBody, createTour)
+    .post(createTour)
 
 router
     .route('/:id')
