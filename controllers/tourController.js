@@ -4,8 +4,29 @@ const Tour = require('./../models/tourModel')
 exports.getAllTours = async (req, res) => {
 
     try {
-        const tours = await Tour.find()
+        //BUILD QUERY
+        //1) FILTERING
+        const queryObj = { ...req.query }
+        const excludedFields = ['page', 'sort', 'limit', 'fields']
+        excludedFields.forEach(el => delete queryObj[el])
 
+        //2) ADVANCED FITERING
+        let queryStr = JSON.stringify(queryObj)
+        queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`)
+        console.log(JSON.parse(queryStr))
+        //MONGODB OPERATORS USED --> gte, gt, lte, lt
+        console.log(queryObj)
+
+        const query = Tour.find(JSON.parse(queryStr))
+
+        // { duration:{$gte: '5'}, difficulty: 'easy', limit: '4' } --> queryString after parsing
+        // { duration: { gte: '5' }, difficulty: 'easy', limit: '4' }---> queryObj
+
+
+        //EXECUTE QUERY
+        const tours = await query
+
+        //SEND RESPONSE
         res.status(200).json({
             status: "sucess",
             results: tours.length,
