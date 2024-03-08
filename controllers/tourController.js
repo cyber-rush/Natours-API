@@ -14,7 +14,6 @@ exports.getAllTours = async (req, res) => {
         //1(B) ADVANCED FITERING( MONGODB OPERATORS USED --> gte, gt, lte, lt)
         let queryStr = JSON.stringify(queryObj)
         queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`)
-        console.log(JSON.parse(queryStr))
         // { duration:{$gte: '5'}, difficulty: 'easy', limit: '4' } --> queryString after parsing
         // { duration: { gte: '5' }, difficulty: 'easy', limit: '4' }---> queryObj
 
@@ -40,6 +39,17 @@ exports.getAllTours = async (req, res) => {
             query = query.select('-__v')
         }
 
+        // 4) Pagination
+        const page = req.query.page * 1 || 1
+        const limit = req.query.limit * 1 || 100
+        const skip = (page - 1) * limit
+        // page=2&limit=10 --> here we requested page 2 which has 11-20 data. 1-10 on page 1, 11-20 on page 2, and so on...
+        query = query.skip(skip).limit(limit)
+
+        if (req.query.page) {
+            const numTours = await Tour.countDocuments()
+            if (skip >= numTours) throw new Error('This page does not exist')
+        }
 
         //EXECUTE QUERY
         const tours = await query
