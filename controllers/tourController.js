@@ -4,23 +4,31 @@ const Tour = require('./../models/tourModel')
 exports.getAllTours = async (req, res) => {
 
     try {
+        console.log(req.query)
         //BUILD QUERY
-        //1) FILTERING
+        // 1(A) FILTERING
         const queryObj = { ...req.query }
         const excludedFields = ['page', 'sort', 'limit', 'fields']
         excludedFields.forEach(el => delete queryObj[el])
 
-        //2) ADVANCED FITERING
+        //1(B) ADVANCED FITERING( MONGODB OPERATORS USED --> gte, gt, lte, lt)
         let queryStr = JSON.stringify(queryObj)
         queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`)
         console.log(JSON.parse(queryStr))
-        //MONGODB OPERATORS USED --> gte, gt, lte, lt
-        console.log(queryObj)
-
-        const query = Tour.find(JSON.parse(queryStr))
-
         // { duration:{$gte: '5'}, difficulty: 'easy', limit: '4' } --> queryString after parsing
         // { duration: { gte: '5' }, difficulty: 'easy', limit: '4' }---> queryObj
+
+        let query = Tour.find(JSON.parse(queryStr))
+
+        // 2) SORTING
+        if (req.query.sort) {
+            const sortBy = req.query.sort.split(',').join(' ')
+            query = query.sort(sortBy)
+            // sort('price ratingsAverage) --> The sortBy should be of this form
+        }
+        else {
+            query = query.sort('-createdAt')   // sort according to newly created first if no sorting is there
+        }
 
 
         //EXECUTE QUERY
