@@ -1,7 +1,10 @@
 const express = require('express')
 const router = express.Router()
-const { getAllTours, createTour, getTour, updateTour, deleteTour } = require('./../controllers/tourController')
+const { getAllTours, createTour, getTour, updateTour, deleteTour, aliasTopTours } = require('./../controllers/tourController')
 
+router
+    .route('/top-5-cheap')
+    .get(aliasTopTours, getAllTours) // aliasTopTours is the middleware func 
 
 router
     .route('/')
